@@ -4,10 +4,6 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
-context.fillStyle = '#000';
-context.fillRect(0, 0,  canvas.width, canvas.height);
-
-
 const matrix = [
   [0, 0, 0],
   [1, 1, 1],
@@ -15,6 +11,9 @@ const matrix = [
 ];
 
 function draw(){
+  context.fillStyle = '#000';
+  context.fillRect(0, 0,  canvas.width, canvas.height);
+
   drawMatrix(player.matrix, player.pos);
 }
 
@@ -23,10 +22,33 @@ function drawMatrix(matrix, offset){
     row.forEach((value, x) => {
       if (value !== 0){
         context.fillStyle = 'red';
-        context.fillRect(x + offset.x, y+offset.y, 1, 1);
+        context.fillRect( x + offset.x,
+                          y+offset.y,
+                          1, 1);
       }
     });
   });
+}
+
+function playerDrop(){
+  player.pos.y++;
+  dropCounter = 0;
+}
+
+let dropCounter = 0;
+let dropInterval = 1000;
+
+let lastTime = 0;
+function update(time = 0){
+  const deltaTime = time - lastTime;
+  lastTime = time;
+
+  dropCounter += deltaTime;
+  if (dropCounter > dropInterval){
+    playerDrop();
+  }
+  draw();
+  requestAnimationFrame(update);
 }
 
 const player = {
@@ -34,4 +56,14 @@ const player = {
   matrix: matrix,
 }
 
-draw();
+document.addEventListener('keydown', event => {
+  if (event.keyCode === 37){
+    player.pos.x--;
+  } else if (event.keyCode === 39){
+    player.pos.x++;
+  } else if (event.keyCode === 40){
+    playerDrop();
+  }
+});
+
+update();
